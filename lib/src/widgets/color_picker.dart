@@ -11,7 +11,8 @@ class ColorPicker extends StatelessWidget {
   final Function(String) onColorPicked;
 
   // Pre-computed colors for better performance
-  static final List<Color> _computedColors = _colorList.map((hex) => HexColor.fromHex(hex)).toList();
+  static final List<Color> _computedColors =
+      _colorList.map((hex) => HexColor.fromHex(hex)).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +25,9 @@ class ColorPicker extends StatelessWidget {
             itemCount: _colorList.length,
             padding: const EdgeInsets.all(2),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
+              crossAxisCount: 4,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
             ),
             itemBuilder: (context, index) {
               return WebViewAware(
@@ -43,9 +44,9 @@ class ColorPicker extends StatelessWidget {
   Widget _colorPaletteItem(int index) {
     return Container(
       decoration: BoxDecoration(
-          color: _computedColors[index],
-          border: Border.all(width: 0.3, color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(2),
+        color: _computedColors[index],
+        border: Border.all(width: 0.3, color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(2),
       ),
       width: 40,
       height: 40,

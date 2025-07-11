@@ -1,5 +1,5 @@
-import 'dart:core';
 import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1080,20 +1080,20 @@ class ToolBarState extends State<ToolBar> {
           _formatMap['color'] = color;
           _cachedColor = HexColor.fromHex(color); // Cache the converted color
           _toolbarList[i] = _toolbarList[i].copyWith(isActive: true);
-          
+
           // Hide overlay first for immediate visual feedback
           if (_fontColorKey.currentState != null) {
             _fontColorKey.currentState!.hideOverlay();
           }
-          
+
           // Cancel previous timer if still running
           _colorUpdateTimer?.cancel();
-          
+
           // Debounce the controller update to avoid excessive calls
           _colorUpdateTimer = Timer(const Duration(milliseconds: 50), () {
             widget.controller.setFormat(format: 'color', value: color);
           });
-          
+
           // Update UI immediately
           if (mounted) setState(() {});
         },
@@ -1126,7 +1126,7 @@ class ToolBarState extends State<ToolBar> {
                     fontSize: 14),
               ),
               Container(
-                color: _cachedColor ?? 
+                color: _cachedColor ??
                     (_formatMap['color'] != null
                         ? HexColor.fromHex(_formatMap['color'])
                         : Colors.black),

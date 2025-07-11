@@ -206,9 +206,12 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
             return LayoutBuilder(builder: (context, constraints) {
               _initialContent = _getQuillPage(width: constraints.maxWidth);
               return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: _buildEditorView(
-                    context: context, width: constraints.maxWidth),
+                padding: const EdgeInsets.only(right: 0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _buildEditorView(
+                      context: context, width: constraints.maxWidth),
+                ),
               );
             });
           }
@@ -600,10 +603,10 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
         .ql-editor.ql-blank::before{
          font-family: "$_fontFamily", sans-serif !important;
         -webkit-user-select: text !important;
-          padding-left:${widget.hintTextPadding?.left ?? '0'}px !important;
-          padding-right:${widget.hintTextPadding?.right ?? '0'}px !important;
-          padding-top:${widget.hintTextPadding?.top ?? '0'}px !important;
-          padding-bottom:${widget.hintTextPadding?.bottom ?? '0'}px !important;
+          padding-left:${widget.hintTextPadding?.left ?? '16'}px !important;
+          padding-right:${widget.hintTextPadding?.right ?? '16'}px !important;
+          padding-top:${widget.hintTextPadding?.top ?? '12'}px !important;
+          padding-bottom:${widget.hintTextPadding?.bottom ?? '12'}px !important;
           position: center;
           left:0px;
           text-align: ${StringUtil.getCssTextAlign(widget.hintTextAlign)};
@@ -628,10 +631,10 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
           color:${(widget.textStyle!.color ?? Colors.black).toRGBA()};
           background-color:${widget.backgroundColor.toRGBA()};
           font-weight: ${StringUtil.getCssFontWeight(widget.textStyle?.fontWeight)};
-          padding-left:${widget.padding?.left ?? '0'}px;
-          padding-right:${widget.padding?.right ?? '0'}px;
-          padding-top:${widget.padding?.top ?? '0'}px;
-          padding-bottom:${widget.padding?.bottom ?? '0'}px;
+          padding-left:${widget.padding?.left ?? '16'}px;
+          padding-right:${widget.padding?.right ?? '16'}px;
+          padding-top:${widget.padding?.top ?? '12'}px;
+          padding-bottom:${widget.padding?.bottom ?? '12'}px;
           min-height: auto;
         
           contenteditable: true !important;
@@ -643,10 +646,10 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
           -webkit-user-select: text !important;
           height: auto !important;
           min-height: auto !important;
-          padding-left:${widget.padding?.left ?? '0'}px !important;
-          padding-right:${widget.padding?.right ?? '0'}px !important;
-          padding-top:${widget.padding?.top ?? '0'}px !important;
-          padding-bottom:${widget.padding?.bottom ?? '0'}px !important;
+          padding-left:${widget.padding?.left ?? '16'}px !important;
+          padding-right:${widget.padding?.right ?? '16'}px !important;
+          padding-top:${widget.padding?.top ?? '12'}px !important;
+          padding-bottom:${widget.padding?.bottom ?? '12'}px !important;
         }
         .ql-toolbar { 
           position: absolute; 

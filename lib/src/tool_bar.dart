@@ -414,67 +414,44 @@ class ToolBarState extends State<ToolBar> {
 
   @override
   Widget build(BuildContext context) {
-    // if (widget._isScrollable!) {
-    //   return IgnorePointer(
-    //     ignoring: !widget.controller.isEnable,
-    //     child: Container(
-    //         width: double.maxFinite,
+    // Get screen width for responsive design
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400; // iPhone SE and smaller
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
 
-    //         /// margin for the container
-    //         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 30),
+    // Adjust margins and padding based on screen size
+    EdgeInsets responsiveMargin;
+    EdgeInsets responsivePadding;
 
-    //         /// padding for the container
-    //         padding: const EdgeInsets.all(8),
+    if (isSmallScreen) {
+      // iPhone SE (320-375px) and similar small devices
+      responsiveMargin = const EdgeInsets.only(left: 8, right: 8, bottom: 20);
+      responsivePadding = const EdgeInsets.all(6);
+    } else if (isTablet) {
+      // Tablet devices
+      responsiveMargin = const EdgeInsets.only(left: 12, right: 12, bottom: 25);
+      responsivePadding = const EdgeInsets.all(8);
+    } else {
+      // Default mobile and desktop
+      responsiveMargin = const EdgeInsets.only(left: 16, right: 16, bottom: 30);
+      responsivePadding = const EdgeInsets.all(8);
+    }
 
-    //         /// container decoration
-    //         decoration: BoxDecoration(
-    //           /// container color
-    //           color: Colors.white,
-    //           boxShadow: [
-    //             BoxShadow(
-    //               color: Colors.black.withAlpha(100), // very subtle dark shadow
-    //               spreadRadius: 1,
-    //               blurRadius: 12,
-    //               offset: const Offset(0, 4),
-    //             ),
-    //             BoxShadow(
-    //               color: Colors.white.withAlpha(80), // soft highlight
-    //               spreadRadius: -4,
-    //               blurRadius: 20,
-    //               offset: const Offset(0, -2),
-    //             ),
-    //           ],
-    //           borderRadius: BorderRadius.circular(16),
-    //         ),
-    //         child: Row(
-    //           children: _generateToolBar(context),
-    //         )
-    //         // Flex(
-    //         //   direction: widget.direction,
-    //         //   crossAxisAlignment: CrossAxisAlignment.start,
-    //         //   textDirection: widget.textDirection,
-    //         //   verticalDirection: widget.verticalDirection,
-    //         //   clipBehavior: widget.clipBehavior,
-    //         //   children: ,
-    //         // ),
-    //         ),
-    //   );
-    // }
     return IgnorePointer(
       ignoring: !widget.controller.isEnable,
       child: Container(
           width: double.maxFinite,
 
-          /// margin for the container
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 30),
+          /// responsive margin for the container
+          margin: responsiveMargin,
 
-          /// padding for the container
-          padding: const EdgeInsets.all(8),
+          /// responsive padding for the container
+          padding: responsivePadding,
 
           /// container decoration
           decoration: BoxDecoration(
             /// container color
-            color: Colors.white,
+            color: widget.toolBarColor ?? Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(100), // very subtle dark shadow
@@ -489,10 +466,50 @@ class ToolBarState extends State<ToolBar> {
                 offset: const Offset(0, -2),
               ),
             ],
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 16),
           ),
-          child: Row(
-            children: _generateToolBar(context),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Get screen width for responsive design
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isSmallScreen = screenWidth < 400; // iPhone SE and smaller
+              final isTablet = screenWidth >= 600 && screenWidth < 1024;
+              
+              // Use Wrap for small screens and narrow containers
+              if (isSmallScreen || constraints.maxWidth < 350) {
+                return Wrap(
+                  direction: Axis.horizontal,
+                  alignment: WrapAlignment.center,
+                  spacing: 2.0,
+                  runSpacing: 4.0, // Slightly more vertical spacing
+                  children: _generateToolBar(context).map((widget) {
+                    // Scale down icons slightly on very small screens
+                    return Transform.scale(
+                      scale: 0.9,
+                      child: widget,
+                    );
+                  }).toList(),
+                );
+              } else if (isTablet) {
+                // Tablet: Use Wrap with better spacing for larger screens
+                return Wrap(
+                  direction: Axis.horizontal,
+                  alignment: WrapAlignment.center,
+                  spacing: 4.0,
+                  runSpacing: 6.0,
+                  children: _generateToolBar(context),
+                );
+              } else {
+                // Desktop and large screens: Use SingleChildScrollView with Row
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _generateToolBar(context),
+                  ),
+                );
+              }
+            },
           )
           // Flex(
           //   direction: widget.direction,

@@ -25,6 +25,9 @@ class ToolBar extends StatefulWidget {
   ///[customButtons] to add custom buttons in the toolbar
   final List<Widget>? customButtons;
 
+  ///[customButtonAtIndex0] to add a specific custom button at index 0
+  final Widget? customButtonAtIndex0;
+
   ///[iconSize] to define the toolbar icon size
   final double? iconSize;
 
@@ -278,6 +281,7 @@ class ToolBar extends StatefulWidget {
     this.toolBarConfig,
     required this.controller,
     this.customButtons,
+    this.customButtonAtIndex0,
     this.padding,
     this.iconSize = 25,
     this.iconColor = Colors.black,
@@ -310,6 +314,7 @@ class ToolBar extends StatefulWidget {
     this.toolBarConfig,
     required this.controller,
     this.customButtons,
+    this.customButtonAtIndex0,
     this.padding,
     this.iconSize = 25,
     this.iconColor = Colors.black,
@@ -344,6 +349,7 @@ class ToolBarState extends State<ToolBar> {
   Map<String, dynamic> _formatMap = {};
   late GlobalKey<ElTooltipState> _fontColorKey;
   EdgeInsetsGeometry _buttonPadding = const EdgeInsets.all(3);
+  late ScrollController _scrollController;
 
   // Text format state: 0 = normal, 1 = bold, 2 = italic
   int _textFormatState = 0;
@@ -358,6 +364,7 @@ class ToolBarState extends State<ToolBar> {
   void initState() {
     _fontColorKey = GlobalKey<ElTooltipState>(
         debugLabel: 'fontColorKey${widget.controller.hashCode.toString()}');
+    _scrollController = ScrollController();
 
     if (widget.padding != null) {
       _buttonPadding = widget.padding!;
@@ -394,6 +401,21 @@ class ToolBarState extends State<ToolBar> {
       }
     }
     super.initState();
+
+    // Scroll to end after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToEnd();
+    });
+  }
+
+  void _scrollToEnd() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Widget? _getCustomIconForStyle(ToolBarStyle style) {
@@ -410,6 +432,14 @@ class ToolBarState extends State<ToolBar> {
       default:
         return null;
     }
+  }
+
+  @override
+  void dispose() {
+    _colorUpdateTimer?.cancel();
+    _fontColorKey.currentState?.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -470,45 +500,15 @@ class ToolBarState extends State<ToolBar> {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Get screen width for responsive design
-              final screenWidth = MediaQuery.of(context).size.width;
-              final isSmallScreen = screenWidth < 400; // iPhone SE and smaller
-              final isTablet = screenWidth >= 600 && screenWidth < 1024;
-              
-              // Use Wrap for small screens and narrow containers
-              if (isSmallScreen || constraints.maxWidth < 350) {
-                return Wrap(
-                  direction: Axis.horizontal,
-                  alignment: WrapAlignment.center,
-                  spacing: 2.0,
-                  runSpacing: 4.0, // Slightly more vertical spacing
-                  children: _generateToolBar(context).map((widget) {
-                    // Scale down icons slightly on very small screens
-                    return Transform.scale(
-                      scale: 0.9,
-                      child: widget,
-                    );
-                  }).toList(),
-                );
-              } else if (isTablet) {
-                // Tablet: Use Wrap with better spacing for larger screens
-                return Wrap(
-                  direction: Axis.horizontal,
-                  alignment: WrapAlignment.center,
-                  spacing: 4.0,
-                  runSpacing: 6.0,
+              // Use SingleChildScrollView with Row for all screen sizes
+              return SingleChildScrollView(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: _generateToolBar(context),
-                );
-              } else {
-                // Desktop and large screens: Use SingleChildScrollView with Row
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _generateToolBar(context),
-                  ),
-                );
-              }
+                ),
+              );
             },
           )
           // Flex(
@@ -521,12 +521,6 @@ class ToolBarState extends State<ToolBar> {
           // ),
           ),
     );
-  }
-
-  @override
-  void dispose() {
-    _colorUpdateTimer?.cancel();
-    super.dispose();
   }
 
   ///[updateToolBarFormat] method to update the toolbar state in sync with editor formats
@@ -673,13 +667,42 @@ class ToolBarState extends State<ToolBar> {
   List<Widget> _generateToolBar(BuildContext context) {
     List<Widget> tempToolBarList = [];
 
+    // Add custom button at index 0 if provided
+    if (widget.customButtonAtIndex0 != null) {
+      tempToolBarList.add(widget.customButtonAtIndex0!);
+    } else {
+      // Add default custom button at index 0
+      tempToolBarList.add(
+        ToolBarItem(
+          activeIconColor: widget.activeIconColor!,
+          iconColor: widget.iconColor!,
+          iconSize: widget.iconSize!,
+          padding: _buttonPadding,
+          style: ToolBarStyle.bold, // Use any style as placeholder
+          isActive: false,
+          borderColor: widget.borderColor,
+          borderRadius: widget.borderRadius,
+          customIcon: Icon(
+            Icons.add, // You can change this to any icon you want
+            color: widget.iconColor,
+            size: widget.iconSize! - 4,
+          ),
+          onTap: () {
+            // Add your custom functionality here
+            debugPrint('Custom button at index 0 tapped!');
+            // Example: widget.controller.insertText('Custom text');
+          },
+        ),
+      );
+    }
+
     for (int i = 0; i < _toolbarList.length; i++) {
       var toolbarItem = _toolbarList[i];
       if (toolbarItem.style == ToolBarStyle.size) {
         tempToolBarList.add(Tooltip(
             waitDuration: const Duration(milliseconds: 800),
             message: toolbarItem.style.name,
-            child: SizedBox(height: 44, child: _fontSizeDD())));
+            child: SizedBox(child: _fontSizeDD())));
       }
       // else if (toolbarItem.style == ToolBarStyle.align) {
       //   tempToolBarList.add(Tooltip(
@@ -912,10 +935,7 @@ class ToolBarState extends State<ToolBar> {
     }
     if (widget.customButtons != null && widget.customButtons!.isNotEmpty) {
       for (var element in widget.customButtons!) {
-        tempToolBarList.add(Padding(
-          padding: _buttonPadding,
-          child: element,
-        ));
+        tempToolBarList.add(element);
       }
     }
     return tempToolBarList;

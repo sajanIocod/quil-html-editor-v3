@@ -51,7 +51,7 @@ class QuillHtmlEditor extends StatefulWidget {
     ),
     this.hintTextStyle = const TextStyle(
       fontStyle: FontStyle.normal,
-      fontSize: 20.0,
+      fontSize: 14.0,
       color: Colors.black87,
       fontWeight: FontWeight.normal,
     ),
@@ -1037,6 +1037,24 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
               placeholder: '${widget.hintText ?? "Description"}',
               clipboard: {
                 matchVisual: true
+              }
+            });
+
+            quilleditor.addEventListener("blur", function() {
+                if($kIsWeb) {
+                FocusChanged(false);
+                } else {
+                var focus  = quilleditor.hasFocus();
+                  FocusChanged.postMessage(isQuillFocused());
+                }
+            });
+
+            quilleditor.addEventListener("focus", function() {
+              if($kIsWeb) {
+                FocusChanged(true);
+              } else {
+              var focus  = quilleditor.hasFocus();
+                FocusChanged.postMessage(isQuillFocused());
               }
             });
             

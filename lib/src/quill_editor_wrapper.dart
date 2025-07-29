@@ -207,7 +207,10 @@ class QuillHtmlEditorState extends State<QuillHtmlEditor> {
               _initialContent = _getQuillPage(width: constraints.maxWidth);
               return Padding(
                 padding: const EdgeInsets.only(right: 0),
-                child: SizedBox(
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE4E4E7))),
                   width: double.infinity,
                   child: _buildEditorView(
                       context: context, width: constraints.maxWidth),

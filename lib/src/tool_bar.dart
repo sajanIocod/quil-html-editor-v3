@@ -348,6 +348,7 @@ class ToolBarState extends State<ToolBar> {
   List<ToolBarItem> _toolbarList = [];
   Map<String, dynamic> _formatMap = {};
   late GlobalKey<ElTooltipState> _fontColorKey;
+
   EdgeInsetsGeometry _buttonPadding = const EdgeInsets.all(3);
   late ScrollController _scrollController;
 
@@ -367,7 +368,7 @@ class ToolBarState extends State<ToolBar> {
     _scrollController = ScrollController();
 
     if (widget.padding != null) {
-      _buttonPadding = widget.padding!;
+      _buttonPadding = widget.padding ?? const EdgeInsets.all(3);
     }
     if (widget.toolBarConfig == null || widget.toolBarConfig!.isEmpty) {
       for (var style in ToolBarStyle.values) {
@@ -455,16 +456,16 @@ class ToolBarState extends State<ToolBar> {
 
     if (isSmallScreen) {
       // iPhone SE (320-375px) and similar small devices
-      responsiveMargin = const EdgeInsets.only(left: 8, right: 8, bottom: 20);
-      responsivePadding = const EdgeInsets.all(6);
+      responsiveMargin = const EdgeInsets.only(bottom: 10);
+      responsivePadding = const EdgeInsets.only(bottom: 0);
     } else if (isTablet) {
       // Tablet devices
-      responsiveMargin = const EdgeInsets.only(left: 12, right: 12, bottom: 25);
-      responsivePadding = const EdgeInsets.all(8);
+      responsiveMargin = const EdgeInsets.only(bottom: 25);
+      responsivePadding = const EdgeInsets.only(bottom: 0);
     } else {
       // Default mobile and desktop
-      responsiveMargin = const EdgeInsets.only(left: 16, right: 16, bottom: 30);
-      responsivePadding = const EdgeInsets.all(8);
+      responsiveMargin = const EdgeInsets.only(bottom: 20);
+      responsivePadding = const EdgeInsets.only(bottom: 0);
     }
 
     return IgnorePointer(
@@ -482,20 +483,20 @@ class ToolBarState extends State<ToolBar> {
           decoration: BoxDecoration(
             /// container color
             color: widget.toolBarColor ?? Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(100), // very subtle dark shadow
-                spreadRadius: 1,
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.white.withAlpha(80), // soft highlight
-                spreadRadius: -4,
-                blurRadius: 20,
-                offset: const Offset(0, -2),
-              ),
-            ],
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black.withAlpha(100), // very subtle dark shadow
+            //     spreadRadius: 1,
+            //     blurRadius: 12,
+            //     offset: const Offset(0, 4),
+            //   ),
+            //   BoxShadow(
+            //     color: Colors.white.withAlpha(80), // soft highlight
+            //     spreadRadius: -4,
+            //     blurRadius: 20,
+            //     offset: const Offset(0, -2),
+            //   ),
+            // ],
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 16),
           ),
           child: LayoutBuilder(
@@ -998,9 +999,13 @@ class ToolBarState extends State<ToolBar> {
   }
 
   Widget _fontSizeDD() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
     return Container(
-      margin: const EdgeInsets.only(left: 4, right: 4),
-      padding: const EdgeInsets.all(10),
+      height: isTablet ? 70 : 44,
+      margin:
+          EdgeInsets.only(left: isTablet ? 15 : 4, right: isTablet ? 15 : 4),
+      padding: EdgeInsets.all(isTablet ? 20 : 10),
       decoration: BoxDecoration(
         border:
             Border.all(color: widget.borderColor ?? const Color(0xFFE4E4E7)),
@@ -1034,10 +1039,11 @@ class ToolBarState extends State<ToolBar> {
             _fontSizeNumberItem(size: '24', value: 'huge'),
           ],
           onChanged: (value) {
-            _formatMap['size'] = value;
-            widget.controller.setFormat(
-                format: 'size', value: value == 'normal' ? '' : value);
-            setState(() {});
+            setState(() {
+              _formatMap['size'] = value;
+              widget.controller.setFormat(
+                  format: 'size', value: value == 'normal' ? '' : value);
+            });
           },
         ),
       ),
@@ -1104,6 +1110,8 @@ class ToolBarState extends State<ToolBar> {
   }
 
   Widget _getFontColorWidget(int i) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
     return ElTooltip(
       onTap: () {
         if (_fontColorKey.currentState != null) {
@@ -1138,7 +1146,9 @@ class ToolBarState extends State<ToolBar> {
       child: Material(
         color: Colors.transparent,
         child: Container(
-          padding: const EdgeInsets.all(10),
+          height: isTablet ? 70 : 45,
+          width: isTablet ? 70 : 43.5,
+          padding: EdgeInsets.all(isTablet ? 20 : 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(2.0),
             // border: Border.all(width: 0.1),
@@ -1232,99 +1242,108 @@ class ToolBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.only(
-          right: 6,
+        padding: EdgeInsets.only(
+          right: isTablet ? 15 : 6,
         ),
-        child: SizedBox(height: 44, width: 43.5, child: _getIconByStyle(style)),
+        child: SizedBox(
+            height: isTablet ? 70 : 44,
+            width: isTablet ? 70 : 43.5,
+            child: _getIconByStyle(style, context)),
       ),
     );
   }
 
-  Widget _getIconByStyle(ToolBarStyle style) {
+  Widget _getIconByStyle(ToolBarStyle style, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
     switch (style) {
       case ToolBarStyle.bold:
         // Show different icons based on text format state
         if (textFormatState != null) {
           switch (textFormatState!) {
             case 0: // normal - show custom SVG
-              return _getCustomIconWidget(_buildNormalTextSvg());
+              return _getCustomIconWidget(_buildNormalTextSvg(), isTablet);
             case 1: // bold
-              return _getIconDataWidget(Icons.format_bold_sharp);
+              return _getIconDataWidget(Icons.format_bold_sharp, isTablet);
             case 2: // italic
-              return _getIconDataWidget(Icons.format_italic_sharp);
+              return _getIconDataWidget(Icons.format_italic_sharp, isTablet);
             default:
-              return _getCustomIconWidget(_buildNormalTextSvg());
+              return _getCustomIconWidget(_buildNormalTextSvg(), isTablet);
           }
         }
         // If no textFormatState, show normal icon
-        return _getCustomIconWidget(_buildNormalTextSvg());
+        return _getCustomIconWidget(_buildNormalTextSvg(), isTablet);
       case ToolBarStyle.italic:
-        return _getIconDataWidget(Icons.format_italic_sharp);
+        return _getIconDataWidget(Icons.format_italic_sharp, isTablet);
       case ToolBarStyle.underline:
-        return _getIconDataWidget(Icons.format_underline_sharp);
+        return _getIconDataWidget(Icons.format_underline_sharp, isTablet);
       case ToolBarStyle.strike:
-        return _getIconDataWidget(Icons.format_strikethrough_sharp);
+        return _getIconDataWidget(Icons.format_strikethrough_sharp, isTablet);
       case ToolBarStyle.blockQuote:
-        return _getIconDataWidget(Icons.format_quote_sharp);
+        return _getIconDataWidget(Icons.format_quote_sharp, isTablet);
       case ToolBarStyle.codeBlock:
-        return _getIconDataWidget(Icons.code_sharp);
+        return _getIconDataWidget(Icons.code_sharp, isTablet);
       case ToolBarStyle.indentAdd:
-        return _getIconDataWidget(Icons.format_indent_increase_sharp);
+        return _getIconDataWidget(Icons.format_indent_increase_sharp, isTablet);
       case ToolBarStyle.indentMinus:
-        return _getIconDataWidget(Icons.format_indent_decrease_sharp);
+        return _getIconDataWidget(Icons.format_indent_decrease_sharp, isTablet);
       case ToolBarStyle.directionRtl:
-        return _getIconDataWidget(Icons.format_textdirection_r_to_l_sharp);
+        return _getIconDataWidget(
+            Icons.format_textdirection_r_to_l_sharp, isTablet);
       case ToolBarStyle.directionLtr:
-        return _getIconDataWidget(Icons.format_textdirection_l_to_r_sharp);
+        return _getIconDataWidget(
+            Icons.format_textdirection_l_to_r_sharp, isTablet);
       case ToolBarStyle.color:
-        return _getIconDataWidget(Icons.palette_outlined);
+        return _getIconDataWidget(Icons.palette_outlined, isTablet);
       case ToolBarStyle.image:
         // If a custom icon is provided, use it instead of the default
         if (customIcon != null) {
-          return _getCustomIconWidget(customIcon!);
+          return _getCustomIconWidget(customIcon!, isTablet);
         }
-        return _getIconDataWidget(Icons.image);
+        return _getIconDataWidget(Icons.image, isTablet);
       case ToolBarStyle.undo:
         // If a custom icon is provided, use it instead of the default
         if (customIcon != null) {
-          return _getCustomIconWidget(customIcon!);
+          return _getCustomIconWidget(customIcon!, isTablet);
         }
-        return _getIconDataWidget(Icons.undo_sharp);
+        return _getIconDataWidget(Icons.undo_sharp, isTablet);
       case ToolBarStyle.redo:
         // If a custom icon is provided, use it instead of the default
         if (customIcon != null) {
-          return _getCustomIconWidget(customIcon!);
+          return _getCustomIconWidget(customIcon!, isTablet);
         }
-        return _getIconDataWidget(Icons.redo_sharp);
+        return _getIconDataWidget(Icons.redo_sharp, isTablet);
       case ToolBarStyle.headerOne:
-        return _getIconDataWidget(Icons.looks_one_sharp);
+        return _getIconDataWidget(Icons.looks_one_sharp, isTablet);
       case ToolBarStyle.headerTwo:
-        return _getIconDataWidget(Icons.looks_two_sharp);
+        return _getIconDataWidget(Icons.looks_two_sharp, isTablet);
       case ToolBarStyle.background:
-        return _getIconDataWidget(Icons.format_color_fill_sharp);
+        return _getIconDataWidget(Icons.format_color_fill_sharp, isTablet);
       case ToolBarStyle.align:
-        return _getIconDataWidget(Icons.format_align_left_sharp);
+        return _getIconDataWidget(Icons.format_align_left_sharp, isTablet);
       case ToolBarStyle.listOrdered:
-        return _getIconDataWidget(Icons.format_list_numbered_sharp);
+        return _getIconDataWidget(Icons.format_list_numbered_sharp, isTablet);
       case ToolBarStyle.listBullet:
-        return _getIconDataWidget(Icons.format_list_bulleted_sharp);
+        return _getIconDataWidget(Icons.format_list_bulleted_sharp, isTablet);
       case ToolBarStyle.size:
-        return _getIconDataWidget(Icons.format_size_sharp);
+        return _getIconDataWidget(Icons.format_size_sharp, isTablet);
       case ToolBarStyle.link:
-        return _getIconDataWidget(Icons.link_sharp);
+        return _getIconDataWidget(Icons.link_sharp, isTablet);
       case ToolBarStyle.video:
-        return _getIconDataWidget(Icons.video_library_sharp);
+        return _getIconDataWidget(Icons.video_library_sharp, isTablet);
       case ToolBarStyle.clean:
-        return _getIconDataWidget(Icons.format_clear_sharp);
+        return _getIconDataWidget(Icons.format_clear_sharp, isTablet);
       case ToolBarStyle.clearHistory:
-        return _getIconDataWidget(Icons.clear_all_sharp);
+        return _getIconDataWidget(Icons.clear_all_sharp, isTablet);
       case ToolBarStyle.addTable:
-        return _getIconDataWidget(Icons.table_chart_sharp);
+        return _getIconDataWidget(Icons.table_chart_sharp, isTablet);
       case ToolBarStyle.editTable:
-        return _getIconDataWidget(Icons.edit_sharp);
+        return _getIconDataWidget(Icons.edit_sharp, isTablet);
       case ToolBarStyle.separator:
         return Container(
           height: 30,
@@ -1332,12 +1351,13 @@ class ToolBarItem extends StatelessWidget {
           color: Colors.grey.shade300,
         );
       default:
-        return _getIconDataWidget(Icons.help);
+        return _getIconDataWidget(
+            Icons.help, isTablet); // Fallback icon for unknown styles
     }
   }
 
-  Widget _getIconDataWidget(IconData iconData) => Container(
-        padding: const EdgeInsets.all(10),
+  Widget _getIconDataWidget(IconData iconData, bool isTablet) => Container(
+        padding: EdgeInsets.all(isTablet ? 20 : 10),
         decoration: BoxDecoration(
           border: Border.all(color: borderColor ?? const Color(0xFFE4E4E7)),
           borderRadius: _getBorderRadius(),
@@ -1350,8 +1370,8 @@ class ToolBarItem extends StatelessWidget {
         ),
       );
 
-  Widget _getCustomIconWidget(Widget customIcon) => Container(
-        padding: const EdgeInsets.all(10),
+  Widget _getCustomIconWidget(Widget customIcon, bool isTablet) => Container(
+        padding: EdgeInsets.all(isTablet ? 20 : 10),
         decoration: BoxDecoration(
           border: Border.all(color: borderColor ?? const Color(0xFFE4E4E7)),
           borderRadius: _getBorderRadius(),
